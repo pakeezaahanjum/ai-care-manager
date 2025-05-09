@@ -1,0 +1,209 @@
+
+* **Graph Representation (Adjacency List)**
+* **Priority Queue (Min-Heap)**
+* **Arrays (Distance and Parent Tracking)**
+* **Vectors (Dynamic List for Neighbors)**
+* **Recursive Function for Path Reconstruction**
+
+
+
+#### **Code:**
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <climits>
+#include <cmath>
+#include <iomanip>
+
+using namespace std;
+
+struct Edge {
+    int dest;
+    int weight;
+};
+
+struct Node {
+    int distance;
+    int parent;
+    bool processed;
+};
+
+class Graph {
+private:
+    int V;  // Number of vertices
+    vector<vector<Edge>> adjList;
+
+public:
+    Graph(int vertices) {
+        V = vertices;
+        adjList.resize(vertices);
+    }
+
+    void addEdge(int u, int v, int w) {
+        adjList[u].push_back({v, w});
+        adjList[v].push_back({u, w});  // Since the graph is undirected
+    }
+
+    void displayGraph() {
+        for (int i = 0; i < V; ++i) {
+            cout << "Adjacency list of vertex " << i << ": ";
+            for (auto &edge : adjList[i]) {
+                cout << "-> " << edge.dest << "(" << edge.weight << ") ";
+            }
+            cout << endl;
+        }
+    }
+
+    void dijkstra(int start, vector<Node> &nodes) {
+        vector<int> dist(V, INT_MAX);
+        vector<int> parent(V, -1);
+        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+
+        dist[start] = 0;
+        pq.push({0, start});
+
+        while (!pq.empty()) {
+            int u = pq.top().second;
+            pq.pop();
+            
+            for (auto &edge : adjList[u]) {
+                int v = edge.dest;
+                int weight = edge.weight;
+                
+                if (dist[u] + weight < dist[v]) {
+                    dist[v] = dist[u] + weight;
+                    parent[v] = u;
+                    pq.push({dist[v], v});
+                }
+            }
+        }
+
+        for (int i = 0; i < V; ++i) {
+            nodes[i].distance = dist[i];
+            nodes[i].parent = parent[i];
+            nodes[i].processed = true;
+        }
+    }
+
+    void reconstructPath(int start, int end, const vector<int> &parent) {
+        if (end == -1) {
+            cout << "No path found!" << endl;
+            return;
+        }
+        vector<int> path;
+        for (int v = end; v != start; v = parent[v]) {
+            path.push_back(v);
+        }
+        path.push_back(start);
+        reverse(path.begin(), path.end());
+        cout << "Shortest path: ";
+        for (int v : path) {
+            cout << v << " ";
+        }
+        cout << endl;
+    }
+};
+
+// Helper function to calculate distance using Euclidean formula
+double calculateDistance(int x1, int y1, int x2, int y2) {
+    return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
+}
+
+int main() {
+    int V = 6;
+    Graph g(V);
+    
+    g.addEdge(0, 1, 2);
+    g.addEdge(0, 3, 8);
+    g.addEdge(1, 3, 5);
+    g.addEdge(1, 4, 6);
+    g.addEdge(2, 4, 9);
+    g.addEdge(2, 5, 3);
+    g.addEdge(3, 4, 3);
+    g.addEdge(4, 5, 1);
+
+    vector<Node> nodes(V);
+
+    // Sample Input: Random destination coordinates
+    int x1 = 0, y1 = 0; // Start coordinates
+    int x2 = 63, y2 = 72; // Destination coordinates
+    
+    double distance = calculateDistance(x1, y1, x2, y2);
+    cout << "Coordinates are (" << x2 << "," << y2 << ")" << endl;
+    cout << "Distance between these points is " << fixed << setprecision(4) << distance << endl;
+
+    // Assuming each rotation covers 0.1m
+    int tyreCircumference = 10; // 10 cm
+    int rotations = static_cast<int>(distance * 100 / tyreCircumference);
+    cout << "Total tyre rotations needed are " << rotations << " cm" << endl;
+
+    g.dijkstra(0, nodes);
+
+    g.displayGraph();
+
+    for (int i = 0; i < V; ++i) {
+        g.reconstructPath(0, i, nodes[i].parent);
+    }
+
+    return 0;
+}
+```
+
+### **Explanation:**
+
+* **Graph Representation:** The graph is represented using an adjacency list, where each node holds a list of edges, with each edge containing a destination node and a weight (distance).
+* **Priority Queue (Min-Heap):** The priority queue is used for efficiently selecting the node with the smallest tentative distance during the execution of Dijkstra's algorithm.
+* **Distance Calculation:** The Euclidean distance between two points (start and destination) is calculated using the formula $\sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2}$.
+* **Reconstructing Paths:** After Dijkstra's algorithm finishes, the `reconstructPath` function traces the shortest path by following the parent node references and outputs the final path.
+
+---
+
+
+
+#### **Functional Demonstration Report Outline:**
+
+* **Introduction:** Overview of the project and its core objective (autonomous navigation via Dijkstra’s algorithm).
+* **Step-by-Step Walkthrough:**
+
+  * **Graph Representation:** Show how the graph is built and explain the adjacency list.
+  * **Priority Queue in Action:** Demonstrate how nodes are processed based on minimum distance using a priority queue.
+  * **Dijkstra’s Algorithm:** Show the iterative process of Dijkstra’s algorithm and how the distances are updated after each iteration.
+  * **Path Reconstruction:** Show how the shortest path is backtracked using the parent array.
+  * **Output:** Display the final output of coordinates, distance, tyre rotations, adjacency list, and shortest path reconstruction.
+
+You can either write a **detailed report** (2 pages) or create a **video** showing these steps visually with explanations.
+
+---
+
+### **3. Efficiency Analysis**
+
+#### **Time Complexity:**
+
+* **Dijkstra’s Algorithm:** The time complexity of Dijkstra’s algorithm, when implemented with a priority queue (min-heap), is $O((V + E) \log V)$, where:
+
+  * $V$ is the number of vertices (nodes).
+  * $E$ is the number of edges in the graph.
+* **Graph Construction:** The graph construction takes $O(E)$ time, where $E$ is the number of edges in the graph.
+* **Path Reconstruction:** Path reconstruction takes $O(V)$ time because, in the worst case, we need to backtrack through all nodes.
+
+#### **Space Complexity:**
+
+* The space complexity is $O(V + E)$, where:
+
+  * $V$ is the number of vertices.
+  * $E$ is the number of edges.
+    This is due to the space needed for storing the graph (adjacency list), the distances array, the parent array, and the priority queue.
+
+---
+
+### **4. Application of Class Concepts**
+
+The project demonstrates several key concepts from the **Data Structures and Algorithms** course:
+
+* **Graph Representation:** Using adjacency lists to represent the environment, nodes, and paths.
+* **Priority Queue (Min-Heap):** A fundamental data structure to select the minimum distance node in each step of Dijkstra’s algorithm.
+* **Greedy Algorithms:** Dijkstra’s algorithm is a classic example of greedy strategy, where we repeatedly select the next node with the smallest tentative distance.
+* **Pathfinding Algorithms:** The project demonstrates how efficient pathfinding algorithms are implemented in robotics for autonomous navigation.
+
